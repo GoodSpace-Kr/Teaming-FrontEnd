@@ -2,7 +2,7 @@
 
 import styles from "./chatroom.module.css";
 import { FiPlus, FiSend } from "react-icons/fi";
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { MdCelebration } from "react-icons/md";
 import { FcDocument, FcAddImage } from "react-icons/fc";
 import { ImExit } from "react-icons/im";
@@ -130,8 +130,6 @@ export default function ChatRoom({ roomData, onRoomUpdate, onRefreshRoom }: Chat
   const [missionModalStatus, setMissionModalStatus] = useState<boolean>(false);
   const [assignmentModalStatus, setAssignmentModalStatus] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
-  const [displayMessages, setDisplayMessages] = useState<ChatMessageType[]>([]);
-  const [hoveredMessage, setHoveredMessage] = useState<number | null>(null);
   const [showExitModal, setShowExitModal] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [showLeaderOnlyModal, setShowLeaderOnlyModal] = useState<boolean>(false);
@@ -167,7 +165,7 @@ export default function ChatRoom({ roomData, onRoomUpdate, onRefreshRoom }: Chat
     ready: roomData.ready,
   });
 
-  const convertWSMessageToDisplay = useCallback((wsMsg: WSChatMessage): ChatMessageType => {
+  const convertWSMessageToDisplay = useCallback((wsMsg: WSChatMessage & { readBy?: number[] }): ChatMessageType => {
     return {
       id: wsMsg.messageId,
       content: wsMsg.content || "",
@@ -175,7 +173,7 @@ export default function ChatRoom({ roomData, onRoomUpdate, onRefreshRoom }: Chat
       senderName: wsMsg.sender.name,
       timestamp: wsMsg.createdAt,
       messageType: wsMsg.type,
-      readBy: [wsMsg.sender.id || 0],
+      readBy: wsMsg.readBy || [wsMsg.sender.id || 0],
       attachments: wsMsg.attachments || [],
     };
   }, []);
@@ -185,11 +183,26 @@ export default function ChatRoom({ roomData, onRoomUpdate, onRefreshRoom }: Chat
     loading: messagesLoading,
     addMessage: addApiMessage,
     markAsRead,
+    updateReadBoundary,
   } = useChatMessages({
     roomId,
     token,
     currentUserId: currentUser.id,
   });
+
+  // 메시지별 변환 결과를 캐싱해, 안 바뀐 메시지는 같은 객체 참조를 유지한다.
+  // (참조가 매번 바뀌면 ChatMessage에 React.memo를 적용해도 전체 목록이 매번 리렌더된다)
+  const convertedMessageCache = useRef(new WeakMap<object, ChatMessageType>());
+  const displayMessages = useMemo(() => {
+    const cache = convertedMessageCache.current;
+    return apiMessages.map((wsMsg) => {
+      const cached = cache.get(wsMsg);
+      if (cached) return cached;
+      const converted = convertWSMessageToDisplay(wsMsg);
+      cache.set(wsMsg, converted);
+      return converted;
+    });
+  }, [apiMessages, convertWSMessageToDisplay]);
 
   // 방 입장 시 unreadCount를 0으로 리셋
   useEffect(() => {
@@ -302,16 +315,9 @@ export default function ChatRoom({ roomData, onRoomUpdate, onRefreshRoom }: Chat
       }
     },
     onReadBoundaryUpdate: (update) => {
-      setDisplayMessages((prev) =>
-        prev.map((msg) => {
-          if (update.lastReadMessageId && msg.id <= update.lastReadMessageId) {
-            if (!msg.readBy.includes(update.userId)) {
-              return { ...msg, readBy: [...msg.readBy, update.userId] };
-            }
-          }
-          return msg;
-        })
-      );
+      if (update.lastReadMessageId) {
+        updateReadBoundary(update.userId, update.lastReadMessageId);
+      }
       if (update.userId === currentUser.id && onRoomUpdate) {
         onRoomUpdate(roomId, 0);
       }
@@ -319,11 +325,6 @@ export default function ChatRoom({ roomData, onRoomUpdate, onRefreshRoom }: Chat
     onMemberEntered: handleMemberEntered,
     onRoomSuccess: handleRoomSuccess,
   });
-
-  useEffect(() => {
-    const converted = apiMessages.map(convertWSMessageToDisplay);
-    setDisplayMessages(converted);
-  }, [apiMessages, convertWSMessageToDisplay]);
 
   useEffect(() => {
     const handleUserInfoUpdate = () => {
@@ -410,18 +411,23 @@ export default function ChatRoom({ roomData, onRoomUpdate, onRefreshRoom }: Chat
     setIsSuccessCompleted(roomData.success || false);
   }, [roomData.success]);
 
-  const chatUsers: ChatUser[] = members.map((member: Member) => {
-    const avatarUrl = member.avatarUrl || "";
+  // members가 실제로 바뀔 때만 새 배열을 만든다 (참조 안정성 -> ChatMessage의 React.memo가 동작하려면 필요)
+  const chatUsers: ChatUser[] = useMemo(
+    () =>
+      members.map((member: Member) => {
+        const avatarUrl = member.avatarUrl || "";
 
-    return {
-      id: member.memberId,
-      name: member.name,
-      avatar: avatarUrl || generateAvatar(member.name),
-      avatarKey: member.avatarKey,
-      avatarVersion: member.avatarVersion,
-      role: member.roomRole,
-    };
-  });
+        return {
+          id: member.memberId,
+          name: member.name,
+          avatar: avatarUrl || generateAvatar(member.name),
+          avatarKey: member.avatarKey,
+          avatarVersion: member.avatarVersion,
+          role: member.roomRole,
+        };
+      }),
+    [members]
+  );
 
   const scrollToBottom = useCallback((): void => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -806,8 +812,6 @@ export default function ChatRoom({ roomData, onRoomUpdate, onRefreshRoom }: Chat
                           showSenderName={showSenderName}
                           isLastMessage={isLastInGroup}
                           allUsers={chatUsers}
-                          hoveredMessage={hoveredMessage}
-                          setHoveredMessage={setHoveredMessage}
                         />
                       );
                     })

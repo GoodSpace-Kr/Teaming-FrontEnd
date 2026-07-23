@@ -35,8 +35,6 @@ interface ChatMessageProps {
     avatarKey?: string;
     avatarVersion?: number;
   }>;
-  hoveredMessage: number | null;
-  setHoveredMessage: (id: number | null) => void;
 }
 
 // 기본 아바타 생성 함수
@@ -46,15 +44,7 @@ const generateAvatar = (name: string): string => {
   return avatars[index];
 };
 
-export default function ChatMessage({
-  message,
-  currentUserId,
-  showSenderName = true,
-  isLastMessage = false,
-  allUsers,
-  hoveredMessage,
-  setHoveredMessage,
-}: ChatMessageProps) {
+function ChatMessage({ message, currentUserId, showSenderName = true, isLastMessage = false, allUsers }: ChatMessageProps) {
   const { data: session } = useSession();
   const isMyMessage = message.senderId === currentUserId;
   const isSystemMessage = message.messageType === "SYSTEM" || message.messageType === "SYSTEM_NOTICE";
@@ -119,21 +109,6 @@ export default function ChatMessage({
     }
   };
 
-  // 안 읽은 사용자 계산 함수
-  const getUnreadUsers = (message: ChatMessage) => {
-    return allUsers.filter(
-      (user) => user.id !== message.senderId && user.id !== currentUserId && !message.readBy.includes(user.id)
-    );
-  };
-
-  // 안 읽은 사용자 수 계산 함수
-  const getUnreadCount = (message: ChatMessage) => {
-    return allUsers.filter((user) => user.id !== message.senderId && !message.readBy.includes(user.id)).length;
-  };
-
-  const unreadCount = getUnreadCount(message);
-  const unreadUsers = getUnreadUsers(message);
-
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString("ko-KR", {
@@ -192,8 +167,6 @@ export default function ChatMessage({
           <div className={styles.messageRow}>
             <div
               className={`${styles.messageBubble} ${isMyMessage ? styles.myBubble : styles.otherBubble}`}
-              onMouseEnter={() => setHoveredMessage(message.id)}
-              onMouseLeave={() => setHoveredMessage(null)}
             >
               {message.messageType === "TEXT" && <span className={styles.messageText}>{message.content}</span>}
 
@@ -278,30 +251,16 @@ export default function ChatMessage({
               )}
             </div>
 
-            {/* 시간과 읽음 상태 표시 */}
             {isLastMessage && (
               <div className={styles.messageInfo}>
                 <div className={styles.messageTime}>{formatTime(message.timestamp)}</div>
-                {/* 안 읽은 사람이 있을 때 표시 */}
-                {/*{unreadCount > 0 && <div className={styles.unreadCount}>{unreadCount}</div>}*/}
               </div>
             )}
           </div>
-
-          {/* 호버 시 안 읽은 사용자 목록 표시 */}
-          {/*     
-          {hoveredMessage === message.id && unreadCount > 0 && (
-            <div className={styles.unreadTooltip}>
-              <div className={styles.tooltipHeader}>안 읽은 사람</div>
-              {unreadUsers.map((user) => (
-                <div key={user.id} className={styles.tooltipUser}>
-                  <span className={styles.tooltipName}>{user.name}</span>
-                </div>
-              ))}
-            </div>
-          )}*/}
         </div>
       </div>
     </div>
   );
 }
+
+export default React.memo(ChatMessage);
