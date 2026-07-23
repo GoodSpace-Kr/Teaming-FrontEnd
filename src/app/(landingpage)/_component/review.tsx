@@ -1,4 +1,4 @@
-import TextType from "./TextType";
+import TextType from "@/app/_component/TextType";
 import styles from "./review.module.css";
 
 export default function Review() {

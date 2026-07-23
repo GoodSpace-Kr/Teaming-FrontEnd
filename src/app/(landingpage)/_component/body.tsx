@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import styles from "./body.module.css";
-import DarkVeil from "./DarkVeil";
+import DarkVeil from "@/app/_component/DarkVeil";
 
 export default function Body() {
   const backgroundRef = useRef<HTMLDivElement>(null);
