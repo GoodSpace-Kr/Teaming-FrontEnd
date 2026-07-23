@@ -64,6 +64,10 @@ export function getUserByEmail(email: string): UserRecord | undefined {
   return undefined;
 }
 
+// 시드에 없는 이메일로 로그인/회원가입해도 방이 하나도 없어 화면이 텅 비지
+// 않도록, 새로 생기는 유저는 자동으로 데모 방 몇 개에 멤버로 들어가 있게 한다.
+const DEFAULT_ROOMS_FOR_NEW_USER = [101, 104];
+
 export function getOrCreateUserByEmail(email: string, name?: string): UserRecord {
   const existing = getUserByEmail(email);
   if (existing) return existing;
@@ -75,9 +79,26 @@ export function getOrCreateUserByEmail(email: string, name?: string): UserRecord
     name: name || email.split("@")[0],
     avatarKey: "",
     avatarVersion: 0,
-    avatarUrl: "/basicProfile.webp",
+    avatarUrl: "",
   };
   store.users.set(id, user);
+
+  for (const roomId of DEFAULT_ROOMS_FOR_NEW_USER) {
+    const members = store.roomMembers.get(roomId);
+    if (!members || members.some((m) => m.memberId === id)) continue;
+    members.push({
+      memberId: id,
+      name: user.name,
+      avatarKey: user.avatarKey,
+      avatarVersion: user.avatarVersion,
+      avatarUrl: user.avatarUrl,
+      roomRole: "MEMBER",
+      lastReadMessageId: 0,
+      paid: true,
+      entered: true,
+    });
+  }
+
   return user;
 }
 
