@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Client, IMessage } from "@stomp/stompjs";
+import type { IMessage } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { createStompClient, type IStompClient } from "@/mocks/stomp/factory";
 
 interface RoomSuccessEvent {
   roomId: number;
@@ -96,7 +97,7 @@ export const useWebSocket = ({
 }: UseWebSocketProps) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const clientRef = useRef<Client | null>(null);
+  const clientRef = useRef<IStompClient | null>(null);
 
   const callbacksRef = useRef({
     onMessageReceived,
@@ -128,7 +129,7 @@ export const useWebSocket = ({
 
     console.log("WebSocket 연결 시도:", wsUrl);
 
-    const client = new Client({
+    const client = createStompClient({
       webSocketFactory: () => new SockJS(wsUrl),
       connectHeaders: {
         Authorization: `Bearer ${token}`,

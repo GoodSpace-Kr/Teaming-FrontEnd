@@ -3,7 +3,8 @@
 import { JSX, useState, useEffect, useCallback, useRef } from "react";
 import { Room, Member } from "@/types/room";
 import { useSession } from "next-auth/react";
-import { Client, IMessage } from "@stomp/stompjs";
+import type { IMessage } from "@stomp/stompjs";
+import { createStompClient } from "@/mocks/stomp/factory";
 import SockJS from "sockjs-client";
 import styles from "./actionbar.module.css";
 
@@ -348,7 +349,7 @@ export default function ActionBar({
       process.env.NEXT_PUBLIC_BACKEND_URL || "http://13.125.193.243:8080"
     }/ws-sockjs?token=${encodeURIComponent(session.accessToken)}`;
 
-    const client = new Client({
+    const client = createStompClient({
       webSocketFactory: () => new SockJS(wsUrl),
       connectHeaders: {
         Authorization: `Bearer ${session.accessToken}`,
