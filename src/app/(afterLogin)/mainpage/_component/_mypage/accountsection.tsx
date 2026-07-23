@@ -25,7 +25,7 @@ export default function AccountSection() {
   const [userInfo, setUserInfo] = useState<UserInfo>({
     email: "",
     nickname: "",
-    profileImage: "/images/default-avatar.png",
+    profileImage: "/basicProfile.webp",
     joinDate: "2024.03.15",
     emailVerified: true,
   });
@@ -94,7 +94,7 @@ export default function AccountSection() {
         nickname: data.name,
         profileImage: data.avatarKey
           ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/files/${data.avatarKey}?v=${data.avatarVersion}`
-          : "/images/default-avatar.png",
+          : "/basicProfile.webp",
       }));
     } catch (err) {
       console.error("AccountSection: 회원정보를 가져오는데 실패했습니다:", err);
