@@ -451,8 +451,11 @@ export default function ChatRoom({ roomData, onRoomUpdate, onRefreshRoom }: Chat
     setMessage(e.target.value);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent): void => {
+  const handleKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === "Enter" && !e.shiftKey) {
+      // keydown 시점에 preventDefault해야 브라우저의 암묵적 form submit(=이중 전송)까지
+      // 확실히 막힌다. keypress에서 막으면 일부 브라우저에서 form의 onSubmit이 추가로
+      // 한 번 더 발생해 메시지가 두 번 전송되는 문제가 있었다.
       e.preventDefault();
       handleSendMessage(e);
     }
@@ -833,7 +836,7 @@ export default function ChatRoom({ roomData, onRoomUpdate, onRefreshRoom }: Chat
                   type="text"
                   value={message}
                   onChange={handleInputChange}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyDown}
                   placeholder="메시지를 입력하세요"
                   className={styles.messageInput}
                   disabled={!isConnected}
