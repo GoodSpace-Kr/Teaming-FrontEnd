@@ -205,3 +205,38 @@
 .submissionContent::-webkit-scrollbar-thumb:hover {
   background: #666;
 }
+
+@media (max-width: 480px) {
+  .submissionHeader,
+  .submissionFooter {
+    padding: 0.75rem 1rem;
+  }
+
+  .submissionContent {
+    padding: 1rem;
+  }
+
+  .infoItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .fileViewItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .downloadButton {
+    align-self: stretch;
+  }
+
+  .submissionFooter {
+    flex-direction: column-reverse;
+  }
+
+  .cancelButton {
+    width: 100%;
+  }
+}

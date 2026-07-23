@@ -114,6 +114,32 @@
   font-size: 16px;
 }
 
+@media (max-width: 768px) {
+  .profileCard {
+    padding: 1.5rem;
+  }
+
+  .profileHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .nicknameSection {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .userMeta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .nicknameInput {
+    max-width: 100%;
+  }
+}
+
 .verifiedBadge {
   background: #4caf50;
   color: white;

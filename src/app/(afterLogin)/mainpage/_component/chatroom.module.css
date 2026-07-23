@@ -673,12 +673,24 @@
 .exitModalContent {
   display: flex;
   width: 500px;
+  max-width: 90vw;
   height: 300px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 1.5rem;
   color: white;
+}
+
+@media (max-width: 480px) {
+  .exitModalContent {
+    height: auto;
+    padding: 2rem 1rem;
+  }
+
+  .exitModalTitle {
+    font-size: 1.5rem;
+  }
 }
 
 .exitModalTitle {

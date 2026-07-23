@@ -31,3 +31,25 @@
   color: #838383;
   font-weight: 400;
 }
+
+@media (max-width: 768px) {
+  .container {
+    width: 88%;
+  }
+
+  .teaming {
+    font-size: 20px;
+  }
+
+  .created,
+  .year {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: 92%;
+    padding: 0 4px;
+  }
+}

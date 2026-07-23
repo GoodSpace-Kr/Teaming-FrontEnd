@@ -11,6 +11,13 @@
   padding-left: 3rem; /* 좌측 패딩 복원 */
 }
 
+@media (max-width: 768px) {
+  .container {
+    /* 사이드바가 오버레이 드로어로 바뀌므로 본문이 풀폭을 쓰도록 */
+    padding-left: 0;
+  }
+}
+
 /* mainpage.module.css에 추가할 스타일 */
 
 /* 인증 오류 모달 */

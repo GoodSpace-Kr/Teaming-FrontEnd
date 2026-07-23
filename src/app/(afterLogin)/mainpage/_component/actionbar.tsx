@@ -92,6 +92,7 @@ export default function ActionBar({
   refreshTrigger,
 }: ActionBarProps): JSX.Element {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState<boolean>(false);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -459,6 +460,7 @@ export default function ActionBar({
   const handleItemClick = (item: string): void => {
     setSelectedItem(item);
     onMenuSelect(item);
+    setIsMobileNavOpen(false);
   };
 
   const handleRoomClick = (room: Room): void => {
@@ -467,6 +469,7 @@ export default function ActionBar({
     // 방 선택
     onRoomSelect(room);
     setSelectedItem(null);
+    setIsMobileNavOpen(false);
 
     // unreadCount를 즉시 0으로 리셋
     if (room.unreadCount !== undefined && room.unreadCount > 0) {
@@ -478,13 +481,35 @@ export default function ActionBar({
   const handleHomeClick = (): void => {
     setSelectedItem(null);
     onMenuSelect("");
+    setIsMobileNavOpen(false);
   };
 
   const displayUserImage = userInfo?.image || "/basicProfile.webp";
   const displayUserName = userInfo?.name || "사용자";
 
   return (
-    <div className={styles.actionBar}>
+    <>
+      <button
+        type="button"
+        className={styles.hamburgerButton}
+        onClick={() => setIsMobileNavOpen((prev) => !prev)}
+        aria-label="메뉴 열기"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M3 6h18M3 12h18M3 18h18"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      <div
+        className={`${styles.overlay} ${isMobileNavOpen ? styles.open : ""}`}
+        onClick={() => setIsMobileNavOpen(false)}
+      />
+      <div className={`${styles.actionBar} ${isMobileNavOpen ? styles.open : ""}`}>
       <div className={styles.header} onClick={handleHomeClick}>
         Teaming
       </div>
@@ -570,6 +595,7 @@ export default function ActionBar({
           ))
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

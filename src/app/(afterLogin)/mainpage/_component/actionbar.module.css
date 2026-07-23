@@ -8,6 +8,62 @@
   gap: 1rem;
 }
 
+/* 모바일 전용: 사이드바를 열고 닫는 햄버거 버튼. 데스크톱에서는 숨김 */
+.hamburgerButton {
+  display: none;
+}
+
+/* 모바일에서 드로어가 열렸을 때 뒤를 덮는 반투명 배경 */
+.overlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .hamburgerButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background-color: #121216;
+    border: 1px solid #292929;
+    color: #f7f7f7;
+    z-index: 210;
+    cursor: pointer;
+  }
+
+  .actionBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 80vw;
+    max-width: 300px;
+    height: 100vh;
+    padding: 4rem 1rem 1rem;
+    background-color: #000;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 200;
+    overflow-y: auto;
+  }
+
+  .actionBar.open {
+    transform: translateX(0);
+  }
+
+  .overlay.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 190;
+  }
+}
+
 .header {
   color: #f7f7f7;
   font-size: 24px;

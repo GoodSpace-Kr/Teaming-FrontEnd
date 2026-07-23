@@ -178,11 +178,16 @@
   }
 
   .messageLine {
+    width: 100%;
     font-size: 20px;
   }
 
   .scheduleSection {
     max-width: 100%;
+  }
+
+  .scheduleHeader {
+    width: 100%;
   }
 
   .scheduleList {
